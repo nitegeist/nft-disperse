@@ -1,58 +1,69 @@
-// This is a script for deploying your contracts. You can adapt it to deploy
-// yours, or create new ones.
+const { MerkleTree } = require('merkletreejs');
+const { network, run, ethers } = require('hardhat');
+const { keccak256, bufferToHex } = require('ethereumjs-util');
+const { utils } = require('ethers');
+
 async function main() {
-  // This is just a convenience check
-  if (network.name === "hardhat") {
-    console.warn(
-      "You are trying to deploy a contract to the Hardhat Network, which" +
-        "gets automatically created and destroyed every time. Use the Hardhat" +
-        " option '--network localhost'"
-    );
-  }
+	const [deployer] = await ethers.getSigners();
+	// const addresses = ['0x2410D50Ba4993c1FE13B3DB0BcDaE51B1c617d0a', '0x00000000005dbcB0d0513FcDa746382Fe8a53468'];
+	// console.log('Accounts: ', addresses);
+	console.log('Deploying onto network:', network.name);
+	console.log('Deploying the contracts with the account:', await deployer.getAddress());
+	console.log('Account balance:', (await deployer.getBalance()).toString());
 
-  // ethers is available in the global scope
-  const [deployer] = await ethers.getSigners();
-  console.log(
-    "Deploying the contracts with the account:",
-    await deployer.getAddress()
-  );
+	// const merkleTree = {};
+	// merkleTree.leaves = addresses.map((address) => bufferToHex(utils.solidityKeccak256(['address'], [address])));
+	// merkleTree.tree = new MerkleTree(merkleTree.leaves, keccak256, { sort: true });
+	// merkleTree.root = merkleTree.tree.getHexRoot();
+	const bufficornFactory = await ethers.getContractFactory('Bufficorn');
+	const bufficornContract = await bufficornFactory.deploy();
+	await bufficornContract.deployed();
 
-  console.log("Account balance:", (await deployer.getBalance()).toString());
+	console.log('Bufficorn address:', bufficornContract.address);
 
-  const Token = await ethers.getContractFactory("Token");
-  const token = await Token.deploy();
-  await token.deployed();
+	console.log('Verifying on etherscan...');
+	if (network.name != 'hardhat') {
+		await run('verify', {
+			address: bufficornContract.address,
+			constructorArgParams: [],
+		});
+		console.log('Verified :D');
+	}
 
-  console.log("Token address:", token.address);
+	// We also save the contract's artifacts and address in the frontend directory
+	const deploymentInfo = {
+		network: network.name,
+		'Bufficorn Contract Address': bufficornContract.address,
+	};
+	fs.writeFileSync(`deployments/script-${network.name}.json`, JSON.stringify(deploymentInfo));
 
-  // We also save the contract's artifacts and address in the frontend directory
-  saveFrontendFiles(token);
+	console.log(`Latest contract address written to: deployments/script=${network.name}.json`);
 }
 
-function saveFrontendFiles(token) {
-  const fs = require("fs");
-  const contractsDir = __dirname + "/../frontend/src/contracts";
+// function saveFrontendFiles(token) {
+//   const fs = require("fs");
+//   const contractsDir = __dirname + "/../frontend/src/contracts";
 
-  if (!fs.existsSync(contractsDir)) {
-    fs.mkdirSync(contractsDir);
-  }
+//   if (!fs.existsSync(contractsDir)) {
+//     fs.mkdirSync(contractsDir);
+//   }
 
-  fs.writeFileSync(
-    contractsDir + "/contract-address.json",
-    JSON.stringify({ Token: token.address }, undefined, 2)
-  );
+//   fs.writeFileSync(
+//     contractsDir + "/contract-address.json",
+//     JSON.stringify({ Token: token.address }, undefined, 2)
+//   );
 
-  const TokenArtifact = artifacts.readArtifactSync("Token");
+//   const TokenArtifact = artifacts.readArtifactSync("Token");
 
-  fs.writeFileSync(
-    contractsDir + "/Token.json",
-    JSON.stringify(TokenArtifact, null, 2)
-  );
-}
+//   fs.writeFileSync(
+//     contractsDir + "/Token.json",
+//     JSON.stringify(TokenArtifact, null, 2)
+//   );
+// }
 
 main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+	.then(() => process.exit(0))
+	.catch((error) => {
+		console.error(error);
+		process.exit(1);
+	});
