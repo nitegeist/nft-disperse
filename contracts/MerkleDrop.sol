@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract BufficornMerkleDrop is ReentrancyGuard {
+contract MerkleDrop is ReentrancyGuard {
     bytes32 public immutable root;
     using MerkleProof for bytes32[];
 
@@ -16,47 +16,49 @@ contract BufficornMerkleDrop is ReentrancyGuard {
     }
 
     function batchMerkleDropERC721(
-        IERC721 _token,
+        // IERC721 _token,
         address[] calldata _to,
-        uint256[] calldata _tokenId,
+        uint256[] calldata _tokenIds,
         bytes32[] calldata proof
     ) external nonReentrant {
         require(
-            _to.length == _tokenId.length,
-            "Receivers and IDs are different length"
+            _to.length == _tokenIds.length,
+            "Receivers and IDs are different lengths"
         );
         for (uint256 i = 0; i < _to.length; i++) {
             require(
-                _verify(_leaf(_to[i], _tokenId[i]), proof),
+                _verify(_leaf(_to[i], _tokenIds[i]), proof),
                 "Invalid merkle proof"
             );
-            _token.safeTransferFrom(msg.sender, _to[i], _tokenId[i]);
+            console.log(msg.sender, _to[i], _tokenIds[i]);
+            // _token.safeTransferFrom(msg.sender, _to[i], _tokenId[i]);
         }
     }
 
     function batchMerkleDropERC1155(
-        IERC1155 _token,
+        // IERC1155 _token,
         address[] calldata _to,
-        uint256[] calldata _tokenId,
+        uint256[] calldata _tokenIds,
         uint256[] calldata _amount,
         bytes32[] calldata proof
     ) external nonReentrant {
         require(
-            _to.length == _tokenId.length,
-            "Receivers and IDs are different length"
+            _to.length == _tokenIds.length,
+            "Receivers and IDs are different lengths"
         );
         for (uint256 i = 0; i < _to.length; i++) {
             require(
-                _verify(_leaf(_to[i], _tokenId[i]), proof),
+                _verify(_leaf(_to[i], _tokenIds[i]), proof),
                 "Invalid merkle proof"
             );
-            _token.safeTransferFrom(
-                msg.sender,
-                _to[i],
-                _tokenId[i],
-                _amount[i],
-                ""
-            );
+            console.log(msg.sender, _to[i], _tokenIds[i], _amount[i]);
+            // _token.safeTransferFrom(
+            //     msg.sender,
+            //     _to[i],
+            //     _tokenId[i],
+            //     _amount[i],
+            //     ""
+            // );
         }
     }
 

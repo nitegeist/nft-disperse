@@ -15,16 +15,16 @@ async function main() {
 	// merkleTree.leaves = addresses.map((address) => bufferToHex(utils.solidityKeccak256(['address'], [address])));
 	// merkleTree.tree = new MerkleTree(merkleTree.leaves, keccak256, { sort: true });
 	// merkleTree.root = merkleTree.tree.getHexRoot();
-	const bufficornFactory = await ethers.getContractFactory('Bufficorn');
-	const bufficornContract = await bufficornFactory.deploy();
-	await bufficornContract.deployed();
+	const merkleDropFactory = await ethers.getContractFactory('MerkleDrop');
+	const merkleDropContract = await merkleDropFactory.deploy();
+	await merkleDropContract.deployed();
 
-	console.log('Bufficorn address:', bufficornContract.address);
+	console.log('MerkleDrop address:', merkleDropContract.address);
 
 	console.log('Verifying on etherscan...');
 	if (network.name != 'hardhat') {
 		await run('verify', {
-			address: bufficornContract.address,
+			address: merkleDropContract.address,
 			constructorArgParams: [],
 		});
 		console.log('Verified :D');
@@ -33,7 +33,7 @@ async function main() {
 	// We also save the contract's artifacts and address in the frontend directory
 	const deploymentInfo = {
 		network: network.name,
-		'Bufficorn Contract Address': bufficornContract.address,
+		'MerkleDrop Contract Address': merkleDropContract.address,
 	};
 	fs.writeFileSync(`deployments/script-${network.name}.json`, JSON.stringify(deploymentInfo));
 
