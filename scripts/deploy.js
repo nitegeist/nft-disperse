@@ -5,26 +5,20 @@ const { utils } = require('ethers');
 
 async function main() {
 	const [deployer] = await ethers.getSigners();
-	// const addresses = ['0x2410D50Ba4993c1FE13B3DB0BcDaE51B1c617d0a', '0x00000000005dbcB0d0513FcDa746382Fe8a53468'];
-	// console.log('Accounts: ', addresses);
 	console.log('Deploying onto network:', network.name);
 	console.log('Deploying the contracts with the account:', await deployer.getAddress());
 	console.log('Account balance:', (await deployer.getBalance()).toString());
 
-	// const merkleTree = {};
-	// merkleTree.leaves = addresses.map((address) => bufferToHex(utils.solidityKeccak256(['address'], [address])));
-	// merkleTree.tree = new MerkleTree(merkleTree.leaves, keccak256, { sort: true });
-	// merkleTree.root = merkleTree.tree.getHexRoot();
-	const merkleDropFactory = await ethers.getContractFactory('MerkleDrop');
-	const merkleDropContract = await merkleDropFactory.deploy();
-	await merkleDropContract.deployed();
+	const nftDisperseFactory = await ethers.getContractFactory('NFTDisperse');
+	const nftDisperseContract = await nftDisperseFactory.deploy();
+	await nftDisperseContract.deployed();
 
-	console.log('MerkleDrop address:', merkleDropContract.address);
+	console.log('NFTDisperse address:', nftDisperseContract.address);
 
 	console.log('Verifying on etherscan...');
 	if (network.name != 'hardhat') {
 		await run('verify', {
-			address: merkleDropContract.address,
+			address: nftDisperseContract.address,
 			constructorArgParams: [],
 		});
 		console.log('Verified :D');
@@ -33,7 +27,7 @@ async function main() {
 	// We also save the contract's artifacts and address in the frontend directory
 	const deploymentInfo = {
 		network: network.name,
-		'MerkleDrop Contract Address': merkleDropContract.address,
+		'NFTDisperse Contract Address': nftDisperseContract.address,
 	};
 	fs.writeFileSync(`deployments/script-${network.name}.json`, JSON.stringify(deploymentInfo));
 
