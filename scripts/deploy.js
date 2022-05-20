@@ -1,4 +1,3 @@
-const { MerkleTree } = require('merkletreejs');
 const { network, run, ethers } = require('hardhat');
 const { keccak256, bufferToHex } = require('ethereumjs-util');
 const { utils } = require('ethers');
